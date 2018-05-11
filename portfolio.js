@@ -146,7 +146,7 @@ function yahooQuote(ticker) {
 
         resolve(q)
       }).catch((err) => {
-        console.error(err)
+        console.log(err)
         reject('Serviço temporariamente fora do ar, por favor, tente mais tarde.')
       })
   })
