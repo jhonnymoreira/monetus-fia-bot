@@ -27,20 +27,41 @@ function formatDelta(delta) {
   }
 }
 
-let previousTime = 0
-function throttle(reply) {
-  const time = Date.now()
-  const timeAgo = time - previousTime
-  const min = 300000 // 5 minutes in milliseconds
+function parseCommand(text) {
+  const parts = text.split(' ')
 
-  if (timeAgo < min) {
-    const left = Math.round((min - timeAgo) / 60000 * 100) / 100
-    reply(`Comando executado recentemente, por favor aguarde ${left} minutos e tente novamente.`)
-    return true
-  } else {
-    previousTime = time
-    return false
+  const command = parts[0].toLowerCase().trim()
+
+  let args = ''
+  if (parts[1]) args = parts[1].toString().toUpperCase().trim()
+
+  return { command, args }
+}
+
+let lastCommands = {}
+const min = 300000 // 5 minutes in milliseconds
+
+function throttle(reply, message, ignoreArgs) {
+  const c = parseCommand(message.text)
+
+  let k = message.chat.id.toString() + c.command
+  if (!ignoreArgs) k += c.args
+
+  const last = lastCommands[k]
+  const time = Date.now()
+
+  if (last) {
+    const timeAgo = time - last
+
+    if (timeAgo < min) {
+      const left = Math.round((min - timeAgo) / 60000 * 100) / 100
+      reply(`Comando executado recentemente, por favor aguarde ${left} minutos e tente novamente.`)
+      return true
+    }
   }
+
+  lastCommands[k] = time
+  return false
 }
 
 // Composition
@@ -62,7 +83,7 @@ _Alocação_: ${asset.allocation/100}%
 
 // Details
 bot.command('d', ({ replyWithMarkdown, message: { text } }) => {
-  const ticker = text.slice(2).trim()
+  const ticker = parseCommand(text).args
   const asset = portfolio.getAsset(ticker)
 
   if (!asset) {
@@ -79,10 +100,10 @@ _Descrição_: ${asset.description}
 })
 
 // Quote
-bot.command('q', ({ replyWithMarkdown, message: { text } }) => {
-  if (throttle(replyWithMarkdown)) return
+bot.command('q', ({ replyWithMarkdown, message }) => {
+  if (throttle(replyWithMarkdown, message)) return
 
-  const ticker = text.slice(2).trim()
+  const ticker = parseCommand(message.text).args
   const asset = portfolio.getAsset(ticker)
 
   if (!asset) {
@@ -107,8 +128,8 @@ Volume: ${quote.volume}
 })
 
 // Performance
-bot.command('p', ({ replyWithMarkdown }) => {
-  if (throttle(replyWithMarkdown)) return
+bot.command('p', ({ replyWithMarkdown, message }) => {
+  if (throttle(replyWithMarkdown, message, true)) return
 
   portfolio.fetchPerformance().then((performance) => {
     replyWithMarkdown(`*Performance do portfólio*: ${formatDelta(performance.delta)}`)
@@ -116,8 +137,8 @@ bot.command('p', ({ replyWithMarkdown }) => {
 })
 
 // Detailed Performance
-bot.command('pd', ({ replyWithMarkdown }) => {
-  if (throttle(replyWithMarkdown)) return
+bot.command('pd', ({ replyWithMarkdown, message }) => {
+  if (throttle(replyWithMarkdown, message, true)) return
 
   portfolio.fetchPerformance().then((performance) => {
     let comp = '';
