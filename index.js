@@ -19,7 +19,7 @@ bot.help(({ replyWithMarkdown }) => replyWithMarkdown(`
   /pd - Retorna a performance detalhada do dia do Monetus FIA.
 `))
 
-function formatDelta(delta) {
+function formatDelta (delta) {
   if (delta > 0) {
     return `+${delta}%`
   } else {
@@ -27,7 +27,7 @@ function formatDelta(delta) {
   }
 }
 
-function parseCommand(text) {
+function parseCommand (text) {
   const parts = text.split(' ')
 
   const command = parts[0].toLowerCase().trim()
@@ -41,7 +41,7 @@ function parseCommand(text) {
 let lastCommands = {}
 const min = 300000 // 5 minutes in milliseconds
 
-function throttle(reply, message, ignoreArgs) {
+function throttle (reply, message, ignoreArgs) {
   const c = parseCommand(message.text)
 
   let k = message.chat.id.toString() + c.command
@@ -66,12 +66,12 @@ function throttle(reply, message, ignoreArgs) {
 
 // Composition
 bot.command('c', ({ replyWithMarkdown }) => {
-  let comp = '';
+  let comp = ''
 
   portfolio.composition.forEach((asset) => (
     comp += `
 *${asset.ticker} (${asset.name})*
-_Alocação_: ${asset.allocation/100}%
+_Alocação_: ${asset.allocation / 100}%
     `
   ))
 
@@ -93,7 +93,7 @@ bot.command('d', ({ replyWithMarkdown, message: { text } }) => {
   replyWithMarkdown(`
     *${asset.ticker} (${asset.name})*
 
-_Alocação_: ${asset.allocation/100}%
+_Alocação_: ${asset.allocation / 100}%
 
 _Descrição_: ${asset.description}
   `)
@@ -141,12 +141,12 @@ bot.command('pd', ({ replyWithMarkdown, message }) => {
   if (throttle(replyWithMarkdown, message, true)) return
 
   portfolio.fetchPerformance().then((performance) => {
-    let comp = '';
+    let comp = ''
 
     performance.assets.forEach((asset) => (
       comp += `
   *${asset.ticker} (${asset.name})*
-  _Alocação_: ${asset.allocation/100}%
+  _Alocação_: ${asset.allocation / 100}%
   _Delta_: ${formatDelta(asset.quote.delta)}
       `
     ))
