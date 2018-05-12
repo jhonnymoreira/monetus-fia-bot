@@ -10,7 +10,6 @@
   "scripts": {
     "dev": "supervisor -x micro-bot index.js",
     "start": "micro-bot",
-    "now-start": "micro-bot -d ${NOW_URL}",
     "lint": "eslint .",
     "test": "npm run lint"
   },
