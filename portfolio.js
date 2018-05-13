@@ -120,11 +120,11 @@ const composition = [
   }
 ]
 
-function round(num) {
+function round (num) {
   return Math.round(parseFloat(num) * 100) / 100
 }
 
-function yahooQuote(ticker) {
+function yahooQuote (ticker) {
   return new Promise((resolve, reject) => {
     yahoo
       .getHistoricalData(`${ticker}.SA`, '1d', '1d')
@@ -147,28 +147,28 @@ function yahooQuote(ticker) {
         resolve(q)
       }).catch((err) => {
         console.log(err)
-        reject('Serviço temporariamente fora do ar, por favor, tente mais tarde.')
+        reject(new Error('Serviço temporariamente fora do ar, por favor, tente mais tarde.'))
       })
   })
 }
 
-function yahooQuotes(tickers) {
+function yahooQuotes (tickers) {
   let quotes = []
 
   tickers.forEach((ticker) => {
     quotes.push(yahooQuote(ticker))
   })
 
-  return Promise.all(quotes);
+  return Promise.all(quotes)
 }
 
 const portfolio = {
   composition,
-  getAsset: function(ticker) {
+  getAsset: function (ticker) {
     return composition.find((asset) => asset.ticker === ticker.toUpperCase())
   },
   fetchQuote: yahooQuote,
-  fetchPerformance: function() {
+  fetchPerformance: function () {
     let performance = {
       assets: []
     }
