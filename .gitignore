@@ -35,3 +35,8 @@ node_modules
 .nyc_output
 coverage
 .env
+
+# SQLite
+db/*.db
+
+.DS_Store
